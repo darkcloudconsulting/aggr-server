@@ -97,6 +97,17 @@ COPY  config.json ${WORKDIR}
 
 If you skip this step, you'll be running `aggr-server` in its default setup.
 
+## Internet stability monitor
+
+When investigating gaps in the collected data it helps to know whether the host itself lost connectivity. The `netmon` docker-compose service (`scripts/netmon`, no dependencies, ~64MB RAM) opens a TCP connection to a few well known hosts every 5 seconds, resolves a hostname through DNS, and writes the results to a dedicated `netmon` InfluxDB database (30 days retention).
+
+- `net_probe` (tag `target`): `up` (0/1), `rtt_ms`
+- `net_internet`: `online` (0/1, true when at least `NETMON_MIN_UP` targets answer), `up_targets`, `total_targets`
+
+Outages are also logged (`docker logs aggr-netmon`). In Chronograf, add the `netmon` database as a source and graph `net_internet.online` next to your trade data to correlate gaps with outages. Configure through environment variables: `NETMON_TARGETS` (comma separated `host:port`), `NETMON_INTERVAL`, `NETMON_TIMEOUT`, `NETMON_MIN_UP`, `NETMON_RETENTION`, `NETMON_DATABASE`.
+
+Run it alone with `docker-compose up -d netmon` (it needs the `influx` service).
+
 ## Running Docker
 
 We provide several `docker-compose` services that you could run as containers to help you setting up and running this app. Besides, the main application, all other services are commented out. You will have to uncomment the appropriate lines in order to be able to run them.

@@ -52,6 +52,31 @@ services:
           cpus: '0.3'
           memory: 2048M
 
+  netmon:
+    container_name: aggr-netmon
+    image: node:20.5.0-alpine3.18
+    # zero-dependency script, no build step needed
+    command: ['node', '/netmon/index.js']
+    volumes:
+      - ../scripts/netmon:/netmon:ro
+    environment:
+      - INFLUX_HOST=aggr-influx
+      - INFLUX_PORT=${INFLUX_PORT}
+      # optional overrides:
+      # - NETMON_TARGETS=1.1.1.1:443,8.8.8.8:443,9.9.9.9:443,api.binance.com:443
+      # - NETMON_INTERVAL=5000
+      # - NETMON_RETENTION=30d
+    depends_on:
+      - influx
+    networks:
+      - backend
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+
   chronograf:
     container_name: aggr-chronograf
     image: chronograf:latest
