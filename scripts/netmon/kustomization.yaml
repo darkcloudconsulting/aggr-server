@@ -1,0 +1,15 @@
+# Deploy with:  kubectl apply -k scripts/netmon
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: monitoring
+
+resources:
+  - k8s/deployment.yaml
+
+# index.js is shipped as a ConfigMap (the name gets a content hash suffix, so
+# editing the script rolls the pod automatically)
+configMapGenerator:
+  - name: netmon-script
+    files:
+      - index.js

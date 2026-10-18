@@ -108,6 +108,16 @@ Outages are also logged (`docker logs aggr-netmon`). In Chronograf, add the `net
 
 Run it alone with `docker-compose up -d netmon` (it needs the `influx` service).
 
+### Kubernetes
+
+A Deployment for the `monitoring` namespace is provided in `scripts/netmon`. The script ships as a ConfigMap, so there is no image to build:
+
+```
+kubectl apply -k scripts/netmon
+```
+
+Before applying, check `INFLUX_HOST` in `scripts/netmon/k8s/deployment.yaml` points at your InfluxDB 1.8 service (default: `aggr-influx.monitoring.svc.cluster.local:8086`). Keep `replicas: 1`. Follow the outage log with `kubectl -n monitoring logs deploy/netmon`.
+
 ## Running Docker
 
 We provide several `docker-compose` services that you could run as containers to help you setting up and running this app. Besides, the main application, all other services are commented out. You will have to uncomment the appropriate lines in order to be able to run them.
